@@ -1,7 +1,7 @@
-from logic.european import EuropeanOption
-from logic.american import AmericanOption
-from logic.asian import AsianOption
-from logic.barrier import BarrierOption
+from logic.option import EuropeanOption
+from logic.option import AmericanOption
+from logic.option import AsianOption
+from logic.option import BarrierOption
 from utils.validators import (validate_option_params, validate_barrier_params, validate_asian_params)
 
 
