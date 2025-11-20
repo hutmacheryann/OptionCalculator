@@ -1,28 +1,22 @@
+from .option import Option
 import numpy as np
 from .black_scholes import BlackScholesModel
 from scipy.stats import norm
 
 
-class EuropeanOption:
+class EuropeanOption(Option):
 
-    def __init__(self, S, K, T, r, sigma, q=0, option_type='call'):
-        self.S = S
-        self.K = K
-        self.T = T
-        self.r = r
-        self.sigma = sigma
-        self.q = q
-        self.option_type = option_type.lower()
-        self.bs_model = BlackScholesModel()
-        self.d1 = self.bs_model.d1(self.S, self.K, self.T, self.r, self.sigma, self.q)
-        self.d2 = self.bs_model.d2(self.S, self.K, self.T, self.r, self.sigma, self.q)
-
+    def __init__(self, S, K, T, r, sigma, q=0, option_type='call', num_simulations=10000, num_steps=252):
+        super().__init__(S, K, T, r, sigma, q, option_type, num_simulations, num_steps)
+        self.bs_model = BlackScholesModel(self.S, self.K, self.T, self.r, self.sigma, self.q)
+        self.d1 = self.bs_model.d1()
+        self.d2 = self.bs_model.d2()
+    
     def price(self):
-
        if self.option_type == 'call':
-           return self.bs_model.call_price(self.S, self.K, self.T, self.r, self.sigma, self.q)
+           return self.bs_model.call_price()
        else:
-           return self.bs_model.put_price(self.S, self.K, self.T, self.r, self.sigma, self.q)
+           return self.bs_model.put_price()
 
     def delta(self):
 
