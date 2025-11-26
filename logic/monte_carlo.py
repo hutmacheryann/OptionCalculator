@@ -7,11 +7,24 @@ class MonteCarloEngine:
     def __init__(self, num_simulations=10000, num_steps=252, seed=None):
         self.num_simulations = num_simulations
         self.num_steps = num_steps
-        if seed is not None:
-            np.random.seed(seed)
+        self.seed = seed
+        # Use RandomState for reproducible, independent random number generation
+        self.rng = np.random.RandomState(seed) if seed is not None else np.random.RandomState()
 
     def simulate_paths(self, S0, T, r, sigma, q=0):
-        return BlackScholesModel.simulate_paths(S0, T, r, sigma, q, self.num_simulations, self.num_steps)
+        # Reset the random state to ensure consistent random numbers for Greek calculations
+        if self.seed is not None:
+            self.rng = np.random.RandomState(self.seed)
+
+        dt = T / self.num_steps
+        paths = np.zeros((self.num_simulations, self.num_steps + 1))
+        paths[:, 0] = S0
+
+        for t in range(1, self.num_steps + 1):
+            Z = self.rng.standard_normal(size=self.num_simulations)
+            paths[:, t] = paths[:, t-1] * np.exp((r - q - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z)
+
+        return paths
 
     def price_european(self, S0, K, T, r, sigma, q, option_type):
         paths = self.simulate_paths(S0, T, r, sigma, q)
