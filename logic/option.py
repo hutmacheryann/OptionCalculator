@@ -26,7 +26,9 @@ class AmericanOption(Option):
     def price(self):
         return self.mc_engine.price_american(self.S, self.K, self.T, self.r, self.sigma, self.q, self.option_type)
     
-    def delta(self, bump=0.01):
+    def delta(self, bump_pct=0.01):
+        # Use percentage bump (default 1%) for better Monte Carlo estimation
+        bump = self.S * bump_pct
 
         S_up = self.S + bump
         S_down = self.S - bump
@@ -36,7 +38,9 @@ class AmericanOption(Option):
 
         return (price_up - price_down) / (2 * bump)
 
-    def gamma(self, bump=0.01):
+    def gamma(self, bump_pct=0.01):
+        # Use percentage bump (default 1%) for better Monte Carlo estimation
+        bump = self.S * bump_pct
 
         S_up = self.S + bump
         S_down = self.S - bump
@@ -96,7 +100,9 @@ class AsianOption(Option):
     def price(self):
        return self.mc_engine.price_asian(self.S, self.K, self.T, self.r, self.sigma, self.q, self.option_type, self.average_type)
 
-    def delta(self, bump=0.01):
+    def delta(self, bump_pct=0.01):
+        # Use percentage bump (default 1%) for better Monte Carlo estimation
+        bump = self.S * bump_pct
 
         S_up = self.S + bump
         S_down = self.S - bump
@@ -107,8 +113,10 @@ class AsianOption(Option):
                                           self.option_type, self.average_type)
 
         return (price_up - price_down) / (2 * bump)
-    
-    def gamma(self, bump=0.01):
+
+    def gamma(self, bump_pct=0.01):
+        # Use percentage bump (default 1%) for better Monte Carlo estimation
+        bump = self.S * bump_pct
 
         S_up = self.S + bump
         S_down = self.S - bump
@@ -207,7 +215,9 @@ class BarrierOption(Option):
 
         return None
     
-    def delta(self, bump=0.01):
+    def delta(self, bump_pct=0.01):
+        # Use percentage bump (default 1%) for better Monte Carlo estimation
+        bump = self.S * bump_pct
 
         S_up = self.S + bump
         S_down = self.S - bump
@@ -219,7 +229,9 @@ class BarrierOption(Option):
 
         return (price_up - price_down) / (2 * bump)
 
-    def gamma(self, bump=0.01):
+    def gamma(self, bump_pct=0.01):
+        # Use percentage bump (default 1%) for better Monte Carlo estimation
+        bump = self.S * bump_pct
 
         S_up = self.S + bump
         S_down = self.S - bump
