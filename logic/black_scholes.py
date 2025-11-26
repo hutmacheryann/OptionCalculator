@@ -19,7 +19,7 @@ class BlackScholesModel:
 
     def d2(self):
         if self.T <= 0: return 0
-        return self.d1(self.S, self.K, self.T, self.r, self.sigma, self.q) - self.sigma * np.sqrt(self.T)
+        return self.d1() - self.sigma * np.sqrt(self.T)
 
     def call_price(self):
         if self.T <= 0: return max(self.S - self.K, 0)
