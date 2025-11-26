@@ -39,42 +39,53 @@ class MonteCarloEngine:
         return price
 
     def price_american(self, S0, K, T, r, sigma, q, option_type):
+        """
+        Price American option using Longstaff-Schwartz LSM algorithm.
 
+        Reference: Longstaff & Schwartz (2001) "Valuing American Options by Simulation"
+        """
         paths = self.simulate_paths(S0, T, r, sigma, q)
         dt = T / self.num_steps
 
-
         if option_type.lower() == 'call':
-            intrinsic_value = np.maximum(paths - K, 0)
+            payoff = np.maximum(paths - K, 0)
         else:
-            intrinsic_value = np.maximum(K - paths, 0)
+            payoff = np.maximum(K - paths, 0)
 
+        # Value matrix: stores the value of continuing (not exercising) at each node
+        value = payoff[:, -1].copy()
 
-        cash_flows = intrinsic_value[:, -1].copy()
-
-
+        # Backward induction
         for t in range(self.num_steps - 1, 0, -1):
+            # Discount value from t+1 to t
+            value = value * np.exp(-r * dt)
 
-            discounted_cf = cash_flows * np.exp(-r * dt)
-
-
-            itm = intrinsic_value[:, t] > 0
+            # Regression only on ITM paths
+            itm = payoff[:, t] > 0
 
             if np.sum(itm) > 0:
+                # Regress discounted value on current stock price for ITM paths
                 X = paths[itm, t]
-                Y = discounted_cf[itm]
+                Y = value[itm]
 
-                regression = np.polyfit(X, Y, 2)
-                continuation_value = np.polyval(regression, X)
+                # Fit polynomial regression (degree 2)
+                if len(X) >= 3:
+                    regression = np.polyfit(X, Y, 2)
+                    continuation = np.polyval(regression, X)
+                else:
+                    # Not enough points, use mean
+                    continuation = np.full_like(Y, np.mean(Y))
 
-                exercise = intrinsic_value[itm, t] > continuation_value
+                # Exercise if immediate payoff exceeds continuation value
+                exercise_now = payoff[itm, t] > continuation
 
-                cash_flows[itm] = np.where(exercise,
-                                          intrinsic_value[itm, t],
-                                          discounted_cf[itm])
+                # Update value: max of exercise now vs continue
+                value[itm] = np.where(exercise_now, payoff[itm, t], value[itm])
 
-        price = np.exp(-r * dt) * np.mean(cash_flows)
-        return price
+        # Discount from t=1 to t=0
+        value = value * np.exp(-r * dt)
+
+        return np.mean(value)
 
     def price_asian(self, S0, K, T, r, sigma, q, option_type, average_type='arithmetic'):
 

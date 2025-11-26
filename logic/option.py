@@ -52,17 +52,19 @@ class AmericanOption(Option):
         return (price_up - 2 * price_center + price_down) / (bump ** 2)
 
     def vega(self, bump=0.01):
-
+        # Vega per 1% (1 percentage point) change in volatility
+        # bump=0.01 means sigma changes from 0.20 to 0.21 (1 pp)
         sigma_up = self.sigma + bump
         sigma_down = self.sigma - bump
 
         price_up = self.mc_up.price_american(self.S, self.K, self.T, self.r, sigma_up, self.q, self.option_type)
         price_down = self.mc_down.price_american(self.S, self.K, self.T, self.r, sigma_down, self.q, self.option_type)
 
-        return (price_up - price_down) / (2 * bump) / 100
+        # Return change per 1 percentage point of volatility
+        return (price_up - price_down) / (2 * bump)
 
     def theta(self, bump=1/365):
-
+        # Theta per day (negative for long options)
         T_down = max(self.T - bump, 0)
 
         price_center = self.mc_center.price_american(self.S, self.K, self.T, self.r, self.sigma, self.q, self.option_type)
@@ -71,14 +73,16 @@ class AmericanOption(Option):
         return (price_down - price_center) / bump
 
     def rho(self, bump=0.01):
-
+        # Rho per 1% (1 percentage point) change in interest rate
+        # bump=0.01 means r changes from 0.05 to 0.06 (1 pp)
         r_up = self.r + bump
         r_down = self.r - bump
 
         price_up = self.mc_up.price_american(self.S, self.K, self.T, r_up, self.sigma, self.q, self.option_type)
         price_down = self.mc_down.price_american(self.S, self.K, self.T, r_down, self.sigma, self.q, self.option_type)
 
-        return (price_up - price_down) / (2 * bump) / 100
+        # Return change per 1 percentage point of interest rate
+        return (price_up - price_down) / (2 * bump)
     
     def get_all_greeks(self):
 
@@ -131,7 +135,7 @@ class AsianOption(Option):
         return (price_up - 2 * price_center + price_down) / (bump ** 2)
 
     def vega(self, bump=0.01):
-
+        # Vega per 1% (1 percentage point) change in volatility
         sigma_up = self.sigma + bump
         sigma_down = self.sigma - bump
 
@@ -140,10 +144,10 @@ class AsianOption(Option):
         price_down = self.mc_down.price_asian(self.S, self.K, self.T, self.r, sigma_down, self.q,
                                           self.option_type, self.average_type)
 
-        return (price_up - price_down) / (2 * bump) / 100
+        return (price_up - price_down) / (2 * bump)
 
     def theta(self, bump=1/365):
-
+        # Theta per day
         T_down = max(self.T - bump, 0)
 
         price_center = self.mc_center.price_asian(self.S, self.K, self.T, self.r, self.sigma, self.q,
@@ -154,7 +158,7 @@ class AsianOption(Option):
         return (price_down - price_center) / bump
 
     def rho(self, bump=0.01):
-
+        # Rho per 1% (1 percentage point) change in interest rate
         r_up = self.r + bump
         r_down = self.r - bump
 
@@ -163,7 +167,7 @@ class AsianOption(Option):
         price_down = self.mc_down.price_asian(self.S, self.K, self.T, r_down, self.sigma, self.q,
                                           self.option_type, self.average_type)
 
-        return (price_up - price_down) / (2 * bump) / 100
+        return (price_up - price_down) / (2 * bump)
     
     def get_all_greeks(self):
 
@@ -246,7 +250,7 @@ class BarrierOption(Option):
         return (price_up - 2 * price_center + price_down) / (bump ** 2)
 
     def vega(self, bump=0.01):
-
+        # Vega per 1% (1 percentage point) change in volatility
         sigma_up = self.sigma + bump
         sigma_down = self.sigma - bump
 
@@ -255,10 +259,10 @@ class BarrierOption(Option):
         price_down = self.mc_down.price_barrier(self.S, self.K, self.T, self.r, sigma_down, self.q,
                                             self.option_type, self.barrier_type, self.barrier_level)
 
-        return (price_up - price_down) / (2 * bump) / 100
+        return (price_up - price_down) / (2 * bump)
 
     def theta(self, bump=1/365):
-
+        # Theta per day
         T_down = max(self.T - bump, 0)
 
         price_center = self.mc_center.price_barrier(self.S, self.K, self.T, self.r, self.sigma, self.q,
@@ -269,7 +273,7 @@ class BarrierOption(Option):
         return (price_down - price_center) / bump
 
     def rho(self, bump=0.01):
-
+        # Rho per 1% (1 percentage point) change in interest rate
         r_up = self.r + bump
         r_down = self.r - bump
 
@@ -278,7 +282,7 @@ class BarrierOption(Option):
         price_down = self.mc_down.price_barrier(self.S, self.K, self.T, r_down, self.sigma, self.q,
                                             self.option_type, self.barrier_type, self.barrier_level)
 
-        return (price_up - price_down) / (2 * bump) / 100
+        return (price_up - price_down) / (2 * bump)
 
     def get_all_greeks(self):
 
@@ -320,14 +324,14 @@ class EuropeanOption(Option):
         return (norm.pdf(self.d1) * np.exp(-self.q * self.T)) / (self.S * self.sigma * np.sqrt(self.T))
 
     def vega(self):
-
+        # Vega per 1 percentage point change in volatility
         if self.T <= 0:
             return 0
 
-        return self.S * norm.pdf(self.d1) * np.sqrt(self.T) * np.exp(-self.q * self.T) / 100
+        return self.S * norm.pdf(self.d1) * np.sqrt(self.T) * np.exp(-self.q * self.T)
 
     def theta(self):
-
+        # Theta per day
         if self.T <= 0:
             return 0
 
@@ -343,14 +347,14 @@ class EuropeanOption(Option):
         return theta / 365
 
     def rho(self):
-
+        # Rho per 1 percentage point change in interest rate
         if self.T <= 0:
             return 0
 
         if self.option_type == 'call':
-            return self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(self.d2) / 100
+            return self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(self.d2)
         else:
-            return -self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(-self.d2) / 100
+            return -self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(-self.d2)
 
     def get_all_greeks(self):
 

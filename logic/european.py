@@ -70,12 +70,12 @@ class EuropeanOption(Option):
         return (norm.pdf(self.d1) * np.exp(-self.q * self.T)) / (self.S * self.sigma * np.sqrt(self.T))
 
     def vega(self):
-        """Sensitivity to volatility (∂V/∂σ), expressed per 1% change"""
+        """Sensitivity to volatility (∂V/∂σ), per 1 percentage point change"""
 
         if self.T <= 0:
             return 0
 
-        return self.S * norm.pdf(self.d1) * np.sqrt(self.T) * np.exp(-self.q * self.T) / 100
+        return self.S * norm.pdf(self.d1) * np.sqrt(self.T) * np.exp(-self.q * self.T)
 
     def theta(self):
         """Time decay (∂V/∂t), per day"""
@@ -95,15 +95,15 @@ class EuropeanOption(Option):
         return theta / 365 # convert annualised theta to per-day
 
     def rho(self):
-        """Sensitivity to interest rate (∂V/∂r), expressed per 1% change"""
+        """Sensitivity to interest rate (∂V/∂r), per 1 percentage point change"""
 
         if self.T <= 0:
             return 0
 
         if self.option_type == 'call':
-            return self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(self.d2) / 100
+            return self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(self.d2)
         else:
-            return -self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(-self.d2) / 100
+            return -self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(-self.d2)
 
     def get_all_greeks(self):
         """Returns all major Greeks as dictionary"""
