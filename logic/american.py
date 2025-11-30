@@ -3,6 +3,11 @@ from .option import Option
 
 class AmericanOption(Option):
 
+    def __init__(self,  S, K, T, r, sigma, q=0, option_type='call', num_simulations=10000, num_steps=252):
+        # Store option parameters
+        super().__init__(S, K, T, r, sigma, q, option_type, num_simulations, num_steps)
+
+
     def price(self):
         return self.mc_engine.price_american(self.S, self.K, self.T, self.r, self.sigma, self.q, self.option_type)
     

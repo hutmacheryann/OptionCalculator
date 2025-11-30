@@ -1,5 +1,5 @@
 {
-  "option_style": "american",
+  "option_style": "european",
   "option_type": "call",
   "underlying_price": 100.0,
   "strike_price": 100.0,
