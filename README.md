@@ -7,6 +7,38 @@
 pip install numpy scipy
 ```
 
+## File Structure
+```
+OptionCalculator/
+├── config/
+│   ├── american_call.json
+│   ├── american_put.json
+│   ├── european_call.json
+│   ├── european_put.json
+│   ├── test_american_call_itm.json
+│   ├── test_asian_arithmetic_call.json
+│   ├── test_asian_geometric_call.json
+│   ├── test_barrier_down_out_call.json
+│   └── test_barrier_up_out_call.json
+├── logic/
+│   ├── __init__.py
+│   ├── american.py
+│   ├── asian.py
+│   ├── barrier.py
+│   ├── black_scholes.py
+│   ├── european.py
+│   ├── monte_carlo.py
+│   └── option.py
+├── utils/
+│   ├── __init__.py
+│   ├── validators.py
+│   └── io_handlers.py
+├── calculator.py
+├── main.py
+├── run_all_tests.sh
+└── README.md
+```
+
 ## Usage
 
 ### Basic Usage
