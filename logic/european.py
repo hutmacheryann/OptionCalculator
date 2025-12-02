@@ -1,8 +1,5 @@
 """
-european.py
-
-Implements pricing and Greeks for European call & put options 
-under Black-Scholes framework
+European Option implementation with Black-Scholes pricing and Greeks analytical calculation.
 """
 
 from .option import Option
@@ -13,9 +10,10 @@ from scipy.stats import norm
 
 class EuropeanOption(Option):
     """ 
-    Represents a European-style option with Black-Scholes pricing.
+    European option with closed-form Black-Scholes pricing and Greeks calculated analytically.
     
-    Attributes:
+    Attributes
+    ----------
     S : float
         Current underlying price
     K : float
@@ -52,8 +50,10 @@ class EuropeanOption(Option):
        else:
            return self.bs_model.put_price()
 
+    # Greeks
+    
     def delta(self):
-        """Sensitivity of option value to underlying price (∂V/∂S)"""
+        """Calculate Delta: ∂V/∂S."""
 
         if self.option_type == 'call':
             return norm.cdf(self.d1) * np.exp(-self.q * self.T)
@@ -61,7 +61,7 @@ class EuropeanOption(Option):
             return (norm.cdf(self.d1) - 1) * np.exp(-self.q * self.T)
 
     def gamma(self):
-        """Second derivative wrt price - curvature of option value"""
+        """Calculate Gamma: ∂²V/∂S²."""
 
         if self.T <= 0:
             return 0
@@ -70,7 +70,7 @@ class EuropeanOption(Option):
         return (norm.pdf(self.d1) * np.exp(-self.q * self.T)) / (self.S * self.sigma * np.sqrt(self.T))
 
     def vega(self):
-        """Sensitivity to volatility (∂V/∂σ), expressed per 1% change"""
+        """Calculate Vega: ∂V/∂σ."""
 
         if self.T <= 0:
             return 0
@@ -78,7 +78,7 @@ class EuropeanOption(Option):
         return self.S * norm.pdf(self.d1) * np.sqrt(self.T) * np.exp(-self.q * self.T) / 100
 
     def theta(self):
-        """Time decay (∂V/∂t), per day"""
+        """Calculate Theta: ∂V/∂t."""
 
         if self.T <= 0:
             return 0
@@ -95,7 +95,7 @@ class EuropeanOption(Option):
         return theta / 365 # convert annualised theta to per-day
 
     def rho(self):
-        """Sensitivity to interest rate (∂V/∂r), expressed per 1% change"""
+        """Calculate Rho: ∂V/∂r."""
 
         if self.T <= 0:
             return 0
@@ -106,7 +106,7 @@ class EuropeanOption(Option):
             return -self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(-self.d2) / 100
 
     def get_all_greeks(self):
-        """Returns all major Greeks as dictionary"""
+        """Calculate all Greeks and return as dictionary."""
 
         return {
             'delta': self.delta(),
