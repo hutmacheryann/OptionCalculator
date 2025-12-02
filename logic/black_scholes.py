@@ -5,7 +5,7 @@ from scipy.stats import norm
 
 class BlackScholesModel:
     '''
-    Black Scholes Model class that is used in option pricing classes.
+    Black-Scholes Model class that is used in option pricing classes.
 
     Parameters
     ----------
@@ -33,7 +33,7 @@ class BlackScholesModel:
     
     def d1(self):
         '''
-        Calculates the d1 portion of black scholes
+        Calculates the d1 portion of Black-Scholes
         
         Formula: (ln(S/K) + (r + sigma^2/2) * T) * (sigma * sqrt(T))^-1
         '''
@@ -42,7 +42,7 @@ class BlackScholesModel:
 
     def d2(self):
         '''
-        Calculates the d2 portion of black scholes
+        Calculates the d2 portion of Black-Scholes
         
         Formula: d1 - sigma * sqrt(T)
         '''
@@ -51,7 +51,7 @@ class BlackScholesModel:
 
     def call_price(self):
         '''
-        Calculates the call price using the black scholes model
+        Calculates the call price using the Black-Scholes Model
 
         Formula: cdf(d1) * S - cdf(d2) * K * e^-rT
 
@@ -62,7 +62,7 @@ class BlackScholesModel:
 
     def put_price(self):
         '''
-        Calculates the call price using the black scholes model
+        Calculates the put price using the Black-Scholes Model
 
         Formula: cdf(-d2) * K * e^-rT - cdf(-d1) * S
 
