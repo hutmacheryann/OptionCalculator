@@ -2,6 +2,9 @@
 
 A comprehensive Python-based option pricing tool supporting European, American, Asian, and Barrier options with Black-Scholes and Monte Carlo pricing methods.
 
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
+
+
 ## Features
 
 - **Multiple Option Types:**
@@ -287,6 +290,12 @@ This project is available for educational and research purposes.
 - Additional exotic option types (lookback, chooser)
 - Historical volatility estimation
 - Real-time market data integration
+
+
+## References
+
+- Black, F., & Scholes, M. (1973). The Pricing of Options and Corporate Liabilities
+- Longstaff, F., & Schwartz, E. (2001). Valuing American Options by Simulation
 
 ## Contact
 
