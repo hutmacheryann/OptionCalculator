@@ -1,5 +1,4 @@
 import numpy as np
-import scipy
 from scipy.stats import norm
 
 
@@ -70,16 +69,3 @@ class BlackScholesModel:
         '''
         if self.T <= 0: return max(self.K - self.S, 0)
         return self.K * np.exp(-self.r * self.T) * norm.cdf(-self.d2()) - self.S * np.exp(-self.q * self.T) * norm.cdf(-self.d1())
-
-    @staticmethod
-    def simulate_paths(S0, T, r, sigma, q, num_simulations, num_steps):
-
-        dt = T / num_steps
-        paths = np.zeros((num_simulations, num_steps + 1))
-        paths[:, 0] = S0
-
-        for t in range(1, num_steps + 1):
-            Z = np.random.standard_normal(size=num_simulations)
-            paths[:, t] = paths[:, t-1] * np.exp((r - q - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z)
-
-        return paths

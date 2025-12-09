@@ -7,6 +7,6 @@
   "volatility": 0.3,
   "risk_free_rate": 0.05,
   "dividend_yield": 0.0,
-  "num_simulations": 10000,
-  "num_steps": 100
+  "num_simulations": 100000,
+  "num_steps": 252
 }
