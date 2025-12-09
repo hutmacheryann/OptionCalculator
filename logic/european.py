@@ -23,6 +23,7 @@ class EuropeanOption(Option):
         self.d2 = self.bs_model.d2()
 
     def price(self):
+        """Return analytical price using Black-Scholes model"""
         if self.option_type == 'call':
             return self.bs_model.call_price()
         return self.bs_model.put_price()
@@ -30,22 +31,25 @@ class EuropeanOption(Option):
     # Analytical Greeks (override base class MC Greeks)
 
     def delta(self):
+        """Calculate Delta: ∂V/∂S."""
         if self.option_type == 'call':
             return norm.cdf(self.d1) * np.exp(-self.q * self.T)
         return (norm.cdf(self.d1) - 1) * np.exp(-self.q * self.T)
 
     def gamma(self):
+        """Calculate Gamma: ∂²V/∂S²."""
         if self.T <= 0:
             return 0
         return (norm.pdf(self.d1) * np.exp(-self.q * self.T)) / (self.S * self.sigma * np.sqrt(self.T))
 
     def vega(self):
-        """Vega: change in price per 1 unit change in volatility."""
+        """Calculate Vega: ∂V/∂σ."""
         if self.T <= 0:
             return 0
         return self.S * norm.pdf(self.d1) * np.sqrt(self.T) * np.exp(-self.q * self.T)
 
     def theta(self):
+        """Calculate Theta: ∂V/∂t."""
         if self.T <= 0:
             return 0
         if self.option_type == 'call':
@@ -59,7 +63,7 @@ class EuropeanOption(Option):
         return theta / 365
 
     def rho(self):
-        """Rho: change in price per 1 unit change in interest rate."""
+        """Calculate Rho: ∂V/∂r."""
         if self.T <= 0:
             return 0
         if self.option_type == 'call':
@@ -67,6 +71,7 @@ class EuropeanOption(Option):
         return -self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(-self.d2)
 
     def get_all_greeks(self):
+        """Calculate all Greeks and return as dictionary."""
         return {
             'delta': self.delta(),
             'gamma': self.gamma(),

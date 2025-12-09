@@ -19,7 +19,14 @@ class BarrierOption(Option):
             raise ValueError("barrier_level is required")
 
     def price(self):
-        """Price using Monte Carlo."""
+        """
+        Calculate Barrier option price using Monte Carlo.
+
+        Returns
+        -------
+        float
+            Option price
+        """
         self.mc_engine.reset_rng()
         return self.mc_engine.price_barrier(self.S, self.K, self.T, self.r, self.sigma, self.q, self.option_type, self.barrier_type, self.barrier_level)
 
@@ -45,7 +52,7 @@ class BarrierOption(Option):
         return np.exp(-self.r * self.T) * np.mean(payoffs)
 
     def theta(self, bump=1/365):
-        """Theta: time decay."""
+        """Theta: time decay (uses separate paths for T and T-bump)."""
         self.mc_engine.reset_rng()
         price_now = self.mc_engine.price_barrier(
             self.S, self.K, self.T, self.r, self.sigma, self.q,

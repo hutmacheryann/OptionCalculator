@@ -6,8 +6,18 @@ import numpy as np
 
 
 class AsianOption(Option):
-    """Asian option with payoff based on average price."""
 
+    """
+    Asian option with payoff based on average underlying price.
+
+    Supports both arithmetic and geometric averaging. Greeks are calculated
+    using finite differences with Common Random Numbers (CRN).
+
+    Attributes
+    ----------
+    average_type : str
+        'arithmetic' or 'geometric' averaging method
+    """
     def __init__(self, S, K, T, r, sigma, q=0, option_type='call', average_type='arithmetic', num_simulations=10000, num_steps=252, seed=42):
         # Initialise parent Option attributes
         super().__init__(S, K, T, r, sigma, q, option_type, num_simulations, num_steps, seed)
@@ -15,7 +25,14 @@ class AsianOption(Option):
         self.average_type = average_type
 
     def price(self):
-        """Price using Monte Carlo."""
+        """
+        Calculate Asian option price using Monte Carlo.
+
+        Returns
+        -------
+        float
+            Option price
+        """
         self.mc_engine.reset_rng()
         return self.mc_engine.price_asian(self.S, self.K, self.T, self.r, self.sigma, self.q, self.option_type, self.average_type)
 
@@ -34,7 +51,7 @@ class AsianOption(Option):
         return np.exp(-self.r * self.T) * np.mean(payoffs)
 
     def theta(self, bump=1/365):
-        """Theta: time decay."""
+        """Theta: time decay (uses separate paths for T and T-bump)."""
         self.mc_engine.reset_rng()
         price_now = self.mc_engine.price_asian(
             self.S, self.K, self.T, self.r, self.sigma, self.q,
