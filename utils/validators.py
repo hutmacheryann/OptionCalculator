@@ -1,7 +1,35 @@
+"""
+Parameter validation utilities.
+
+Validates option parameters to ensure they're physically meaningful.
+"""
+
+
 def validate_option_params(S, K, T, r, sigma, q=0):
     """
-    Sanity check the basic option parameters.
-    Returns (is_valid, error_message) - error_message is None if valid.
+    Validate basic option parameters.
+
+    Parameters
+    ----------
+    S : float
+        Spot price (must be positive)
+    K : float
+        Strike price (must be positive)
+    T : float
+        Time to maturity (must be non-negative)
+    r : float
+        Risk-free rate
+    sigma : float
+        Volatility (must be positive)
+    q : float, optional
+        Dividend yield (must be non-negative)
+
+    Returns
+    -------
+    is_valid : bool
+        True if all parameters are valid
+    error_msg : str or None
+        Error message if invalid, None otherwise
     """
     errors = []
 
@@ -33,8 +61,25 @@ def validate_option_params(S, K, T, r, sigma, q=0):
 
 def validate_barrier_params(barrier_type, barrier_level, S):
     """
-    Check barrier option parameters make sense.
-    The barrier needs to be in the right place relative to current price.
+    Validate barrier option parameters.
+
+    Ensures barrier level is positioned correctly relative to spot price.
+
+    Parameters
+    ----------
+    barrier_type : str
+        One of: 'up-and-out', 'up-and-in', 'down-and-out', 'down-and-in'
+    barrier_level : float
+        Barrier price level (must be positive)
+    S : float
+        Current spot price
+
+    Returns
+    -------
+    is_valid : bool
+        True if parameters are valid
+    error_msg : str or None
+        Error message if invalid, None otherwise
     """
     valid_types = ['up-and-out', 'up-and-in', 'down-and-out', 'down-and-in']
 
@@ -59,8 +104,19 @@ def validate_barrier_params(barrier_type, barrier_level, S):
 
 def validate_asian_params(average_type):
     """
-    Check Asian option parameters.
-    Just need to verify the average type is valid.
+    Validate Asian option parameters.
+
+    Parameters
+    ----------
+    average_type : str
+        Must be 'arithmetic' or 'geometric'
+
+    Returns
+    -------
+    is_valid : bool
+        True if parameter is valid
+    error_msg : str or None
+        Error message if invalid, None otherwise
     """
     valid_types = ['arithmetic', 'geometric']
 

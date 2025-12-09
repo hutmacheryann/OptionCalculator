@@ -71,7 +71,14 @@ class EuropeanOption(Option):
         return -self.K * self.T * np.exp(-self.r * self.T) * norm.cdf(-self.d2)
 
     def get_all_greeks(self):
-        """Calculate all Greeks and return as dictionary."""
+        """
+        Calculate all Greeks and return as dictionary.
+
+        Returns
+        -------
+        dict
+            Greeks: {'delta', 'gamma', 'vega', 'theta', 'rho'}
+        """
         return {
             'delta': self.delta(),
             'gamma': self.gamma(),

@@ -1,18 +1,29 @@
 """
-American Option - uses LSM pricing.
+American Option - Longstaff-Schwartz Monte Carlo pricing.
+
+Uses LSM algorithm for early exercise capability.
 """
 from .option import Option
 
 
 class AmericanOption(Option):
     """
-    American option with early exercise capability.
+    American option with early exercise using LSM pricing.
 
-    Pricing uses the Longstaff-Schwartz Least Squares Monte Carlo (LSM) algorithm.
-    Greeks are calculated using finite differences with Common Random Numbers (CRN)
-    for variance reduction.
+    Greeks calculated via finite differences with CRN for variance reduction.
 
-    Inherits all attributes from Option base class.
+    Parameters
+    ----------
+    S, K, T, r, sigma, q : float
+        Standard option parameters (see Option base class)
+    option_type : {'call', 'put'}
+        Option type
+    num_simulations : int, optional
+        Number of MC paths (default: 10000)
+    num_steps : int, optional
+        Time steps per path (default: 252)
+    seed : int, optional
+        Random seed (default: 42)
     """
 
     def __init__(self, S, K, T, r, sigma, q=0, option_type='call', num_simulations=10000, num_steps=252, seed=42):

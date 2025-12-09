@@ -1,12 +1,35 @@
 """
 Barrier Option - knock-in/knock-out features.
+
+Option activates or deactivates when price crosses barrier level.
 """
 from .option import Option
 import numpy as np
 
 
 class BarrierOption(Option):
-    """Barrier option with knock-in or knock-out features."""
+    """
+    Barrier option with knock-in or knock-out features.
+
+    Greeks calculated via finite differences with CRN.
+
+    Parameters
+    ----------
+    S, K, T, r, sigma, q : float
+        Standard option parameters (see Option base class)
+    option_type : {'call', 'put'}
+        Option type
+    barrier_type : str
+        One of: 'down-and-out', 'down-and-in', 'up-and-out', 'up-and-in'
+    barrier_level : float
+        Price level that activates/deactivates the option
+    num_simulations : int, optional
+        Number of MC paths (default: 10000)
+    num_steps : int, optional
+        Time steps per path (default: 252)
+    seed : int, optional
+        Random seed (default: 42)
+    """
 
     def __init__(self, S, K, T, r, sigma, q=0, option_type='call', barrier_type='down-and-out', barrier_level=None, num_simulations=10000, num_steps=252, seed=42):
         # Initialise parent Option attributes

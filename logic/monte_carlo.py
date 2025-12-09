@@ -5,7 +5,18 @@ import numpy as np
 
 
 class MonteCarloEngine:
-    """Monte Carlo simulation engine for option pricing."""
+    """
+    Monte Carlo engine for simulating price paths and pricing options.
+
+    Parameters
+    ----------
+    num_simulations : int, optional
+        Number of simulation paths (default: 10000)
+    num_steps : int, optional
+        Time steps per path (default: 252)
+    seed : int, optional
+        Random seed for reproducibility (default: 42)
+    """
 
     def __init__(self, num_simulations=10000, num_steps=252, seed=42):
         self.num_simulations = num_simulations
@@ -15,7 +26,29 @@ class MonteCarloEngine:
         self.rng = np.random.default_rng(seed)
 
     def simulate_paths(self, S0, T, r, sigma, q=0):
-        """Generate price paths using GBM dynamics."""
+        """
+        Generate price paths using Geometric Brownian Motion.
+
+        Uses discretized GBM: S(t+dt) = S(t) * exp((r - q - σ²/2)dt + σ√dt·Z)
+
+        Parameters
+        ----------
+        S0 : float
+            Initial spot price
+        T : float
+            Time to maturity in years
+        r : float
+            Risk-free rate
+        sigma : float
+            Volatility
+        q : float, optional
+            Dividend yield (default: 0)
+
+        Returns
+        -------
+        np.ndarray
+            Price paths with shape (num_simulations, num_steps + 1)
+        """
         dt = T / self.num_steps
         paths = np.zeros((self.num_simulations, self.num_steps + 1))
         paths[:, 0] = S0
@@ -32,7 +65,30 @@ class MonteCarloEngine:
         self.rng = np.random.default_rng(self.seed)
 
     def _lsm_pricing(self, paths, K, r, T, option_type):
-        """Price American option using LSM algorithm."""
+        """
+        Price American option using Longstaff-Schwartz Monte Carlo.
+
+        Uses polynomial regression to estimate continuation values and
+        determines optimal exercise decisions via backward induction.
+
+        Parameters
+        ----------
+        paths : np.ndarray
+            Simulated price paths
+        K : float
+            Strike price
+        r : float
+            Risk-free rate
+        T : float
+            Time to maturity
+        option_type : str
+            'call' or 'put'
+
+        Returns
+        -------
+        float
+            American option price
+        """
         dt = T / self.num_steps
 
         if option_type.lower() == 'call':
@@ -59,13 +115,24 @@ class MonteCarloEngine:
     # ====================   Pricing Options   ====================
 
     def price_american(self, S0, K, T, r, sigma, q, option_type):
-        """Price American option using LSM."""
+        """
+        Price American option using LSM algorithm.
+
+        Resets RNG for reproducibility before generating paths.
+        """
         self.reset_rng()  # Ensure reproducibility
         paths = self.simulate_paths(S0, T, r, sigma, q)
         return self._lsm_pricing(paths, K, r, T, option_type)
 
     def price_asian(self, S0, K, T, r, sigma, q, option_type, average_type='arithmetic'):
-        """Price Asian option."""
+        """
+        Price Asian option with arithmetic or geometric averaging.
+
+        Parameters
+        ----------
+        average_type : {'arithmetic', 'geometric'}
+            Averaging method for path prices
+        """
         self.reset_rng()  # Ensure reproducibility
         paths = self.simulate_paths(S0, T, r, sigma, q)
 
@@ -82,7 +149,16 @@ class MonteCarloEngine:
         return np.exp(-r * T) * np.mean(payoffs)
 
     def price_barrier(self, S0, K, T, r, sigma, q, option_type, barrier_type, barrier_level):
-        """Price Barrier option."""
+        """
+        Price Barrier option with knock-in/knock-out features.
+
+        Parameters
+        ----------
+        barrier_type : str
+            One of: 'up-and-out', 'up-and-in', 'down-and-out', 'down-and-in'
+        barrier_level : float
+            Barrier price level
+        """
         self.reset_rng()  # Ensure reproducibility
         paths = self.simulate_paths(S0, T, r, sigma, q)
         ST = paths[:, -1]

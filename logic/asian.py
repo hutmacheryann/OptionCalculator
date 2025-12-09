@@ -1,23 +1,35 @@
 """
 Asian Option - path-dependent averaging.
+
+Payoff based on average underlying price (arithmetic or geometric).
 """
 from .option import Option
 import numpy as np
 
 
 class AsianOption(Option):
-
     """
-    Asian option with payoff based on average underlying price.
+    Asian option with payoff based on average price.
 
-    Supports both arithmetic and geometric averaging. Greeks are calculated
-    using finite differences with Common Random Numbers (CRN).
+    Supports arithmetic and geometric averaging. Greeks calculated via
+    finite differences with CRN.
 
-    Attributes
+    Parameters
     ----------
-    average_type : str
-        'arithmetic' or 'geometric' averaging method
+    S, K, T, r, sigma, q : float
+        Standard option parameters (see Option base class)
+    option_type : {'call', 'put'}
+        Option type
+    average_type : {'arithmetic', 'geometric'}, optional
+        Averaging method (default: 'arithmetic')
+    num_simulations : int, optional
+        Number of MC paths (default: 10000)
+    num_steps : int, optional
+        Time steps per path (default: 252)
+    seed : int, optional
+        Random seed (default: 42)
     """
+
     def __init__(self, S, K, T, r, sigma, q=0, option_type='call', average_type='arithmetic', num_simulations=10000, num_steps=252, seed=42):
         # Initialise parent Option attributes
         super().__init__(S, K, T, r, sigma, q, option_type, num_simulations, num_steps, seed)

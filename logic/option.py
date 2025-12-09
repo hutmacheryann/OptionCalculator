@@ -1,39 +1,51 @@
 """
-Base Option class - all MC options inherit from this.
-Uses single seed and single num_simulations for consistency.
+Base option class for all option types.
+
+Provides common functionality for pricing and Greeks calculation using
+Monte Carlo simulation with Common Random Numbers (CRN).
 """
 from .monte_carlo import MonteCarloEngine
 
 
 class Option:
+
     """
-    Base class for all option types.
+    Abstract base class for all option types.
 
-    This class provides common functionality and attributes shared by all option types.
-    Subclasses should implement their specific pricing and Greeks calculation methods.
+    Implements finite difference Greeks with CRN for variance reduction.
+    Subclasses must implement: price(), _price_from_paths(), and theta().
 
-    Attributes
+    Parameters
     ----------
     S : float
-        Current underlying price
+        Current spot price (must be positive)
     K : float
-        Strike price
+        Strike price (must be positive)
     T : float
-        Time to maturity (in years)
+        Time to maturity in years
     r : float
-        Risk-free interest rate
+        Risk-free rate (e.g., 0.05 for 5%)
     sigma : float
-        Volatility of the underlying asset
-    q : float
-        Continuous dividend yield (default: 0)
-    option_type : str
-        'call' or 'put'
-    num_simulations : int
-        Number of Monte Carlo simulations (default: 10000)
-    num_steps : int
-        Number of time steps in simulation (default: 252)
-    mc_engine : MonteCarloEngine
-        Monte Carlo simulation engine instance
+        Volatility (e.g., 0.2 for 20%)
+    q : float, optional
+        Dividend yield (default: 0)
+    option_type : {'call', 'put'}
+        Option type
+    num_simulations : int, optional
+        Number of MC paths (default: 10000)
+    num_steps : int, optional
+        Time steps per path (default: 252)
+    seed : int, optional
+        Random seed (default: 42)
+
+    Notes
+    -----
+    Bump sizes are calibrated for LSM stability:
+    - Delta: 0.5 (small relative to spot)
+    - Gamma: 5.0 (larger for second derivative)
+    - Vega: 0.01 (1% absolute vol change)
+    - Rho: 0.01 (100 basis points)
+    - Theta: 1/365 (one calendar day)
     """
 
     def __init__(self, S, K, T, r, sigma, q=0, option_type='call',
@@ -62,7 +74,21 @@ class Option:
         raise NotImplementedError("Subclasses must implement _price_from_paths()")
 
     def theta(self, bump=1/365):
-        """Must be implemented by subclasses."""
+        """
+        Calculate Theta: ∂V/∂T using time decay.
+
+        Must be implemented by subclasses as optimal approach differs by type.
+
+        Parameters
+        ----------
+        bump : float, optional
+            Time bump in years (default: 1/365 = one calendar day)
+
+        Returns
+        -------
+        float
+            Theta (rate of time decay per year)
+        """
         raise NotImplementedError("Subclasses must implement theta()")
 
     # === Path Generation ===
@@ -76,12 +102,22 @@ class Option:
         self.mc_engine.reset_rng()
         return self.mc_engine.simulate_paths(S, self.T, r, sigma, self.q)
 
-    # === Greeks (finite differences with CRN) ===
-    # Note: Larger bumps reduce noise but increase bias
-    # These defaults balance noise vs bias for LSM pricing
+    #============= Greeks =======================
 
     def delta(self, bump=0.5):
-        """Delta: ∂V/∂S"""
+        """
+        Calculate Delta: ∂V/∂S using central finite differences.
+
+        Parameters
+        ----------
+        bump : float, optional
+            Spot price bump (default: 0.5)
+
+        Returns
+        -------
+        float
+            Delta (typically 0 to 1 for calls, -1 to 0 for puts)
+        """
         paths_up = self._get_paths_with_params(S=self.S + bump)
         paths_down = self._get_paths_with_params(S=self.S - bump)
 
@@ -91,7 +127,21 @@ class Option:
         return (price_up - price_down) / (2 * bump)
 
     def gamma(self, bump=5.0):
-        """Gamma: ∂²V/∂S² (larger bump needed for LSM stability)"""
+        """
+        Calculate Gamma: ∂²V/∂S² using central finite differences.
+
+        Uses larger bump than Delta for stability with LSM pricing.
+
+        Parameters
+        ----------
+        bump : float, optional
+            Spot price bump (default: 5.0)
+
+        Returns
+        -------
+        float
+            Gamma (always positive for long options)
+        """
         paths_up = self._get_paths_with_params(S=self.S + bump)
         paths_center = self._get_paths_with_params(S=self.S)
         paths_down = self._get_paths_with_params(S=self.S - bump)
@@ -103,7 +153,19 @@ class Option:
         return (price_up - 2 * price_center + price_down) / (bump ** 2)
 
     def vega(self, bump=0.01):
-        """Vega: ∂V/∂σ"""
+        """
+        Calculate Vega: ∂V/∂σ using central finite differences.
+
+        Parameters
+        ----------
+        bump : float, optional
+            Volatility bump (default: 0.01 = 1 percentage point)
+
+        Returns
+        -------
+        float
+            Vega (change in price per 1% vol increase)
+        """
         paths_up = self._get_paths_with_params(sigma=self.sigma + bump)
         paths_down = self._get_paths_with_params(sigma=self.sigma - bump)
 
@@ -113,7 +175,19 @@ class Option:
         return (price_up - price_down) / (2 * bump)
 
     def rho(self, bump=0.01):
-        """Rho: ∂V/∂r"""
+        """
+        Calculate Rho: ∂V/∂r using central finite differences.
+
+        Parameters
+        ----------
+        bump : float, optional
+            Rate bump (default: 0.01 = 100 basis points)
+
+        Returns
+        -------
+        float
+            Rho (change in price per 1% rate increase)
+        """
         paths_up = self._get_paths_with_params(r=self.r + bump)
         paths_down = self._get_paths_with_params(r=self.r - bump)
 
@@ -123,7 +197,14 @@ class Option:
         return (price_up - price_down) / (2 * bump)
 
     def get_all_greeks(self):
-        """Calculate all Greeks."""
+        """
+        Calculate all Greeks and return as dictionary.
+
+        Returns
+        -------
+        dict
+            Greeks: {'delta', 'gamma', 'vega', 'theta', 'rho'}
+        """
         return {
             'delta': self.delta(),
             'gamma': self.gamma(),

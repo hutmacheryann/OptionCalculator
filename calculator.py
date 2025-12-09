@@ -1,5 +1,7 @@
 """
-Main calculator class that orchestrates option pricing.
+Main calculator class for option pricing.
+
+Orchestrates option creation and calculation based on config parameters.
 """
 from logic.european import EuropeanOption
 from logic.american import AmericanOption
@@ -9,7 +11,18 @@ from utils.validators import validate_option_params, validate_barrier_params, va
 
 
 class OptionCalculator:
-    """Main calculator class that creates and prices options based on config."""
+    """
+        Main calculator that creates and prices options based on config.
+
+        Parameters
+        ----------
+        config : dict
+            Configuration dictionary containing option parameters:
+            - option_style: 'european', 'american', 'asian', or 'barrier'
+            - option_type: 'call' or 'put'
+            - underlying_price, strike_price, time_to_maturity, etc.
+
+    """
 
     def __init__(self, config):
         self.config = config
@@ -17,7 +30,19 @@ class OptionCalculator:
         self.results = {}
 
     def create_option(self):
-        """Create the appropriate option object based on config."""
+        """
+        Create the appropriate option object based on config.
+
+        Returns
+        -------
+        Option
+            Instance of appropriate option subclass
+
+        Raises
+        ------
+        ValueError
+            If parameters are invalid or option style is unsupported
+        """
         S = float(self.config['underlying_price'])
         K = float(self.config['strike_price'])
         T = float(self.config['time_to_maturity'])
@@ -65,7 +90,22 @@ class OptionCalculator:
         return self.option
 
     def calculate(self, compute_greeks=True):
-        """Run the full calculation."""
+        """
+        Run the full calculation (price and optionally Greeks).
+
+        Parameters
+        ----------
+        compute_greeks : bool, optional
+            Whether to calculate Greeks (default: True)
+
+        Returns
+        -------
+        dict
+            Results dictionary with keys:
+            - 'price': float
+            - 'greeks': dict or None
+            - 'parameters': dict
+        """
         if self.option is None:
             self.create_option()
 
@@ -83,10 +123,25 @@ class OptionCalculator:
         return self.results
 
     def get_results(self):
+        """Return stored results from last calculation."""
         return self.results
 
 
 def calculate_from_config(config, compute_greeks=True):
-    """Convenience function for quick calculations."""
+    """
+    Convenience function for quick calculations.
+
+    Parameters
+    ----------
+    config : dict
+        Option configuration
+    compute_greeks : bool, optional
+        Whether to calculate Greeks (default: True)
+
+    Returns
+    -------
+    dict
+        Calculation results
+    """
     calculator = OptionCalculator(config)
     return calculator.calculate(compute_greeks)
