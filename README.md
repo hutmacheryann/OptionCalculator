@@ -181,7 +181,7 @@ Configuration files use JSON format. Example for a European call:
 ```json
 {
   "option_style": "asian",
-  "average_type": "arithmetic"  // or "geometric"
+  "average_type": "arithmetic" 
 }
 ```
 
@@ -189,7 +189,7 @@ Configuration files use JSON format. Example for a European call:
 ```json
 {
   "option_style": "barrier",
-  "barrier_type": "down-and-out",  // "up-and-out", "up-and-in", "down-and-in"
+  "barrier_type": "down-and-out",  
   "barrier_level": 90.0
 }
 ```
